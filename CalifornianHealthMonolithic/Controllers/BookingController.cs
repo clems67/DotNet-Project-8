@@ -1,8 +1,10 @@
 ﻿using CalifornianHealthMonolithic.Code;
 using CalifornianHealthMonolithic.Models;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
@@ -22,6 +24,31 @@ namespace CalifornianHealthMonolithic.Controllers
             cons = repo.FetchConsultants(dbContext);
             conList.ConsultantsList = new SelectList(cons, "Id", "FName");
             conList.consultants = cons;
+
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.UserName = "guest";
+            factory.Password = "guest";
+            factory.HostName = "localhost";
+            factory.Port = 5672;
+            factory.ClientProvidedName = "Rabbit Sender Main App";
+
+            IConnection conn = factory.CreateConnection();
+
+            IModel channel = conn.CreateModel();
+
+            string exchangeName = "CalifornianHealthExchange";
+            string routingKey = "GET_APPOINTMENT";
+            string queueName = "AppointmentQueue";
+
+            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+            channel.QueueDeclare(queueName, false, false, false, null);
+            channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+            byte[] messageBodyBytes = Encoding.UTF8.GetBytes("Hello World !");
+            channel.BasicPublish(exchangeName, routingKey, null, messageBodyBytes);
+
+            channel.Close();
+            conn.Close();
 
             return View(conList);
         }
