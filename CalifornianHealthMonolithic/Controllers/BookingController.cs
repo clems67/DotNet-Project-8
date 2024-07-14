@@ -7,6 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
+using System.Threading;
+using System.Diagnostics;
+using System.Data.Entity.Infrastructure;
 
 namespace CalifornianHealthMonolithic.Controllers
 {
@@ -25,33 +31,75 @@ namespace CalifornianHealthMonolithic.Controllers
             conList.ConsultantsList = new SelectList(cons, "Id", "FName");
             conList.consultants = cons;
 
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.UserName = "guest";
-            factory.Password = "guest";
-            factory.HostName = "localhost";
-            factory.Port = 5672;
-            factory.ClientProvidedName = "Rabbit Sender Main App";
+            var rpcClient = new RpcClient();
 
-            IConnection conn = factory.CreateConnection();
-
-            IModel channel = conn.CreateModel();
-
-            string exchangeName = "CalifornianHealthExchange";
-            string routingKey = "GET_APPOINTMENT";
-            string queueName = "AppointmentQueue";
-
-            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-            channel.QueueDeclare(queueName, false, false, false, null);
-            channel.QueueBind(queueName, exchangeName, routingKey, null);
-
-            byte[] messageBodyBytes = Encoding.UTF8.GetBytes("Hello World !");
-            channel.BasicPublish(exchangeName, routingKey, null, messageBodyBytes);
-
-            channel.Close();
-            conn.Close();
+            var response = rpcClient.CallAsync();
 
             return View(conList);
         }
+
+
+        public class RpcClient : IDisposable
+        {
+            private const string QUEUE_NAME = "rpc_queue";
+
+            private readonly IConnection connection;
+            private readonly IModel channel;
+            private readonly string replyQueueName;
+            private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> callbackMapper = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
+
+            public RpcClient()
+            {
+                Debug.WriteLine("\nSetup connection\n");
+                var factory = new ConnectionFactory { HostName = "localhost" };
+
+                connection = factory.CreateConnection();
+                channel = connection.CreateModel();
+                // declare a server-named queue
+                replyQueueName = channel.QueueDeclare().QueueName;
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =>
+                {
+                    if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
+                        return;
+                    var body = ea.Body.ToArray();
+                    var response = Encoding.UTF8.GetString(body);
+                    Debug.WriteLine($"the response in controller : {response}");
+                    tcs.TrySetResult(response);
+                };
+
+                channel.BasicConsume(consumer: consumer,
+                                     queue: replyQueueName,
+                                     autoAck: false);
+            }
+
+            public Task<string> CallAsync(CancellationToken cancellationToken = default)
+            {
+                Debug.WriteLine("\nCallAsync\n");
+                IBasicProperties props = channel.CreateBasicProperties();
+                var correlationId = Guid.NewGuid().ToString();
+                props.CorrelationId = correlationId;
+                props.ReplyTo = replyQueueName;
+                var messageBytes = Encoding.UTF8.GetBytes("yolooooo");
+                var tcs = new TaskCompletionSource<string>();
+                callbackMapper.TryAdd(correlationId, tcs);
+
+                channel.BasicPublish(exchange: string.Empty,
+                                     routingKey: QUEUE_NAME,
+                                     basicProperties: props,
+                                     body: messageBytes);
+
+                cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
+                return tcs.Task;
+            }
+
+            public void Dispose()
+            {
+                channel.Close();
+                connection.Close();
+            }
+        }
+
 
         //TODO: Change this method to ensure that members do not have to wait endlessly. 
         public ActionResult ConfirmAppointment(Appointment model)
