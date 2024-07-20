@@ -2,57 +2,83 @@
 using RabbitMQ.Client;
 using System.Text;
 using AppointmentMicroService.Controllers;
+using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace AppointmentMicroService
 {
     public class MessageServiceSetup
     {
-
+        public ConnectionFactory _connectionFactory = new ConnectionFactory
+        {
+            HostName = "localhost",
+            RequestedHeartbeat = System.TimeSpan.Parse("10"),
+            AutomaticRecoveryEnabled = true
+        };
+        public IConnection _connection { get; set; }
+        public IModel _channel { get; set; }
         public void Setup()
         {
-            ConnectionFactory factory = new ConnectionFactory();
-            //factory.Uri = new Uri("amqp://guest:guest@localhost:5672/");
-            factory.ClientProvidedName = "Rabbit Receiver Microservice App";
+            _connection = _connectionFactory.CreateConnection();
 
-            IConnection connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
 
-            factory.UserName = "guest";
-            factory.Password = "guest";
-            factory.HostName = "localhost";
-            factory.Port = 5672;
-            factory.ClientProvidedName = "Rabbit  Receiver Microservice  App";
+            _channel.QueueDeclare(queue: "rpc_queue",
+                                 durable: false,
+                                 exclusive: false,
+                                 autoDelete: false,
+                                 arguments: null);
 
-            IModel channel = connection.CreateModel();
+            _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+            var consumer = new EventingBasicConsumer(_channel);
+            _channel.BasicConsume(queue: "rpc_queue",
+                autoAck: false,
+                consumer: consumer);
+            Debug.WriteLine("\n Connection microservice rabbitmq\n");
 
-            string exchangeName = "CalifornianHealthExchange";
-            //string routingKey = "DemoRoutingKey";
-            string queueName = "AppointmentQueue";
-
-            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-            channel.QueueDeclare(queueName, false, false, false, null);
-            //channel.QueueBind(queueName, exchangeName, routingKey, null);
-            channel.BasicQos(0, 1, false);
-
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += async (sender, args) =>
+            consumer.Received += (model, ea) =>
             {
-                 var body = args.Body.ToArray();
+                Debug.WriteLine("\nmicroservice called\n");
+                string response = string.Empty;
 
-                string message = Encoding.UTF8.GetString(body);
+                var body = ea.Body.ToArray();
+                var props = ea.BasicProperties;
+                var replyProps = _channel.CreateBasicProperties();
+                replyProps.CorrelationId = props.CorrelationId;
+                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
-                AppointmentController appointmentController = new AppointmentController();
-                if(args.RoutingKey == "GET_APPOINTMENT")
+                try
                 {
-                    await appointmentController.GetAppointment();
+                    var message = Encoding.UTF8.GetString(body);
+                    response = message;
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"\nERROR MICROSERVICE\n [.] {e.Message}");
+                    response = string.Empty;
+                }
+                finally
+                {
+                    try
+                    {
+
+                        var responseBytes = Encoding.UTF8.GetBytes(response);
+                        _channel.BasicPublish(exchange: string.Empty,
+                                             routingKey: props.ReplyTo,
+                                             basicProperties: replyProps,
+                                             body: responseBytes);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine("\nERROR REPLYTO\n");
+                    }
+
                 }
 
-                channel.BasicAck(args.DeliveryTag, false);
-            };
-            string consumerTag = channel.BasicConsume(queueName, false, consumer);
 
-            //channel.BasicCancel(consumerTag);
-            //channel.Close();
-            //conn.Close();
+            };
         }
+
     }
 }
