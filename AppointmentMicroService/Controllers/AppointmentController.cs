@@ -11,7 +11,7 @@ namespace AppointmentMicroService.Controllers
     {
         public async Task GetAppointment()
         {
-            Thread.Sleep(10000);
+            
         }
     }
 }

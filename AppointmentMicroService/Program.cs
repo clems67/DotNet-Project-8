@@ -1,4 +1,7 @@
 
+using AppointmentMicroService.Model;
+using Microsoft.EntityFrameworkCore;
+
 namespace AppointmentMicroService
 {
     public class Program
@@ -14,10 +17,19 @@ namespace AppointmentMicroService
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+
             var app = builder.Build();
 
             MessageServiceSetup messageServiceSetup = new MessageServiceSetup();
             messageServiceSetup.Setup();
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            builder.Services.AddDbContext<ConsultantDBContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("WebApiDatabase")));
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
