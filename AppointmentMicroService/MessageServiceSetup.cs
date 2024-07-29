@@ -4,11 +4,18 @@ using System.Text;
 using AppointmentMicroService.Controllers;
 using System.Diagnostics;
 using System.Threading.Channels;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using AppointmentMicroService.Interfaces;
 
 namespace AppointmentMicroService
 {
     public class MessageServiceSetup
     {
+        public IAppointmentService AppointmentController { get; set; }
+        public MessageServiceSetup(IServiceProvider serviceProvider)
+        {
+            this.AppointmentController = serviceProvider.GetService<IAppointmentService>();
+        }
         public ConnectionFactory _connectionFactory = new ConnectionFactory
         {
             HostName = "localhost",
@@ -17,7 +24,7 @@ namespace AppointmentMicroService
         };
         public IConnection _connection { get; set; }
         public IModel _channel { get; set; }
-        public void Setup()
+        public async void Setup()
         {
             _connection = _connectionFactory.CreateConnection();
 
@@ -36,7 +43,7 @@ namespace AppointmentMicroService
                 consumer: consumer);
             Debug.WriteLine("\n Connection microservice rabbitmq\n");
 
-            consumer.Received += (model, ea) =>
+            consumer.Received += async (model, ea) =>
             {
                 Debug.WriteLine("\nmicroservice called\n");
                 string response = string.Empty;
@@ -49,8 +56,8 @@ namespace AppointmentMicroService
 
                 try
                 {
-                    var message = Encoding.UTF8.GetString(body);
-                    response = message;
+                    response = (await AppointmentController.GetAppointment()).ToString();
+
                 }
                 catch (Exception e)
                 {
