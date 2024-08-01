@@ -19,7 +19,7 @@ namespace AppointmentMicroService.Controllers
         }
         public async Task<int> GetAppointment()
         {
-            return _dbContext.ConsultantDb.Count();
+            return _dbContext.Consultant.Count();
         }
 
 

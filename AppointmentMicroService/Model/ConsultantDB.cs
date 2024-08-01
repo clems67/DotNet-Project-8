@@ -21,7 +21,7 @@ namespace AppointmentMicroService.Model
         {
             options.UseSqlServer("Server=localhost;Database=ConsultantDB;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true");
         }
-        public DbSet<ConsultantTable> ConsultantDb { get; set; }
+        public DbSet<ConsultantTable> Consultant { get; set; }
 
     }
 }

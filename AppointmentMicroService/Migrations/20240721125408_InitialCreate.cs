@@ -11,7 +11,7 @@ namespace AppointmentMicroService.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ConsultantDb",
+                name: "Consultant",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -22,7 +22,7 @@ namespace AppointmentMicroService.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ConsultantDb", x => x.Id);
+                    table.PrimaryKey("PK_Consultant", x => x.Id);
                 });
         }
 
@@ -30,7 +30,7 @@ namespace AppointmentMicroService.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ConsultantDb");
+                name: "Consultant");
         }
     }
 }
