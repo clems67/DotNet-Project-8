@@ -30,9 +30,9 @@ namespace CalifornianHealthMonolithic.Controllers
             conList.ConsultantsList = new SelectList(cons, "Id", "FName");
             conList.consultants = cons;
 
-            var rpcClient = new RpcClient();
+            //var rpcClient = new RpcClient();
 
-            var response = rpcClient.CallAsync();
+            //var response = rpcClient.CallAsync();
 
             return View(conList);
         }
@@ -50,27 +50,27 @@ namespace CalifornianHealthMonolithic.Controllers
 
             public RpcClient()
             {
-                Debug.WriteLine("\nSetup connection\n");
-                var factory = new ConnectionFactory { HostName = "localhost" };
+            //    Debug.WriteLine("\nSetup connection\n");
+            //    var factory = new ConnectionFactory { HostName = "localhost" };
 
-                connection = factory.CreateConnection();
-                channel = connection.CreateModel();
-                // declare a server-named queue
-                replyQueueName = channel.QueueDeclare().QueueName;
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
-                {
-                    if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
-                        return;
-                    var body = ea.Body.ToArray();
-                    var response = Encoding.UTF8.GetString(body);
-                    Debug.WriteLine($"the response in controller : {response}");
-                    tcs.TrySetResult(response);
-                };
+            //    connection = factory.CreateConnection();
+            //    channel = connection.CreateModel();
+            //    // declare a server-named queue
+            //    replyQueueName = channel.QueueDeclare().QueueName;
+            //    var consumer = new EventingBasicConsumer(channel);
+            //    consumer.Received += (model, ea) =>
+            //    {
+            //        if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
+            //            return;
+            //        var body = ea.Body.ToArray();
+            //        var response = Encoding.UTF8.GetString(body);
+            //        Debug.WriteLine($"the response in controller : {response}");
+            //        tcs.TrySetResult(response);
+            //    };
 
-                channel.BasicConsume(consumer: consumer,
-                                     queue: replyQueueName,
-                                     autoAck: false);
+            //    channel.BasicConsume(consumer: consumer,
+            //                         queue: replyQueueName,
+            //                         autoAck: false);
             }
 
             public Task<string> CallAsync(CancellationToken cancellationToken = default)

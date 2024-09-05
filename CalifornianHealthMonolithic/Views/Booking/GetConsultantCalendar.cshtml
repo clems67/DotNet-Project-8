@@ -8,7 +8,7 @@
 <section>
     <label for="consultant">Select Consultant you wish to make an appointment for</label>
     <div class="form-group">
-        @Html.DropDownListFor(m => m.selectedConsultantId, Model.ConsultantsList, "- Please select -", new { @class = "form-control" })
+        @Html.DropDownListFor(m => m.selectedConsultantId, Model.ConsultantsList, "- Please select -", new { @class = "form-control", @onchange = "onChangeDropdown(this)" })
         @Html.ValidationMessageFor(m => m.selectedConsultantId)
     </div>
 
@@ -20,6 +20,27 @@
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 <script>
+    function onChangeDropdown(element) {
+        console.log("onchange triggered: " + element.options[element.value].innerHTML);
+        console.log("onchange triggered: " + element.value);
+
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            firstDay: 1,
+            selectable: true,
+            slotMinTime: '08:00',
+            dateClick: handleDateClick,
+            weekends: false
+        });
+        calendar.render();
+        calendar.addEventSource({
+            events: [
+                { title: 'New Event', start: '2024-09-05T15:00:00', end: '2024-09-05T15:30:00' },
+            ]
+        });
+    }
+
     function handleDateClick(info) {
         const hourSelected = new Date(info.dateStr).getHours();
         if (new Date(info.dateStr) < Date.now()) {
