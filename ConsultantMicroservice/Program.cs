@@ -13,10 +13,15 @@ namespace ConsultantMicroservice
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
+            builder.Services.AddScoped<IConsultantService, ConsultantService>();
+
             builder.Services.AddDbContext<ConsultantDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("WebApiDatabase")));
 
             var app = builder.Build();
+
+            MessageServiceSetup messageServiceSetup = new MessageServiceSetup(builder.Services.BuildServiceProvider());
+            messageServiceSetup.Setup();
 
             app.MapGet("/", () => "Hello World!");
 

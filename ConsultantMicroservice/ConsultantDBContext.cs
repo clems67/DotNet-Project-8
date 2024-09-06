@@ -13,7 +13,7 @@ namespace ConsultantMicroservice
         {
             //options.UseSqlServer(_configuration.GetConnectionString("WebApiDatabase"));
             //options.UseSqlServer("Server=localhost\\MSSQLLocalDB;Database=ConsultantDB;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true");
-            options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
+            options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ConsultantDB;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
         public DbSet<Shared.ConsultantModel> Consultant { get; set; }
 
