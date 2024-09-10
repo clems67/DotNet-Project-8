@@ -13,6 +13,16 @@ namespace CalifornianHealthMonolithic.Models
         public string lname { get; set; }
         public string speciality { get; set; }
     }
+        public class ConsultantModelv2
+    {
+        public int Id { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string Speciality { get; set; }
+    }
 
     public class ConsultantModelList
     {

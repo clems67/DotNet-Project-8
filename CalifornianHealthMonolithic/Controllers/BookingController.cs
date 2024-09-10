@@ -1,5 +1,6 @@
 ﻿using CalifornianHealthMonolithic.Code;
 using CalifornianHealthMonolithic.Models;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -10,18 +11,38 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace CalifornianHealthMonolithic.Controllers
 {
+    public class CreateAppointmentDto
+    {
+        public int consultantId { get; set; }
+        public string patientName { get; set; }
+    }
     public class BookingController : Controller
     {
+
+
+        [System.Web.Mvc.HttpPost]
+        public string TestPostMethod(CreateAppointmentDto createAppointmentDto)
+        {
+            Debug.WriteLine($"\nTestMehod consultantId: {createAppointmentDto.consultantId}\n");
+            Debug.WriteLine("conflict"); 
+            return "409";
+        }
+        [System.Web.Mvc.HttpGet]
+        public string TestGetMethod(int id)
+        {
+            var returnedValue = new CreateAppointmentDto() { consultantId = 1, patientName = "bob" };
+            return JsonConvert.SerializeObject(returnedValue);
+        }
         // GET: Booking
         //TODO: Change this method to display the consultant calendar. Ensure that the user can have a real time view of 
         //the consultant's availability;
-        public ActionResult GetConsultantCalendar()
+        public System.Web.Mvc.ActionResult GetConsultantCalendar()
         {
+            Debug.WriteLine("\nGetConsultantCalendar bookingController\n");
             ConsultantModelList conList = new ConsultantModelList();
             CHDBContext dbContext = new CHDBContext();
             Repository repo = new Repository();
@@ -64,7 +85,9 @@ namespace CalifornianHealthMonolithic.Controllers
                         return;
                     var body = ea.Body.ToArray();
                     var response = Encoding.UTF8.GetString(body);
+                    List<ConsultantModelv2> consultantModelv2s = JsonConvert.DeserializeObject<List<ConsultantModelv2>>(response);
                     Debug.WriteLine($"the response in controller : {response}");
+                    Debug.WriteLine(consultantModelv2s.First().FirstName.ToString());
                     tcs.TrySetResult(response);
                 };
 
@@ -101,7 +124,7 @@ namespace CalifornianHealthMonolithic.Controllers
         }
 
         //TODO: Change this method to ensure that members do not have to wait endlessly. 
-        public ActionResult ConfirmAppointment(Appointment model)
+        public System.Web.Mvc.ActionResult ConfirmAppointment(Appointment model)
         {
             CHDBContext dbContext = new CHDBContext();
 

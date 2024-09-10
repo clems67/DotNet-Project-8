@@ -2,6 +2,6 @@
 {
     public interface IConsultantService
     {
-        Task<int> GetAppointment();
+        Task<List<Shared.ConsultantModel>> GetAppointment();
     }
 }

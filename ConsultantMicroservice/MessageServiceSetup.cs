@@ -2,6 +2,8 @@
 using RabbitMQ.Client;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace ConsultantMicroservice
 {
@@ -42,9 +44,11 @@ namespace ConsultantMicroservice
             consumer.Received += async (model, ea) =>
             {
                 Debug.WriteLine("\nmicroservice called\n");
+                
                 string response = string.Empty;
 
                 var body = ea.Body.ToArray();
+                Debug.WriteLine($"body: " + body);
                 var props = ea.BasicProperties;
                 var replyProps = _channel.CreateBasicProperties();
                 replyProps.CorrelationId = props.CorrelationId;
@@ -52,7 +56,7 @@ namespace ConsultantMicroservice
 
                 try
                 {
-                    response = (await ConsultantController.GetAppointment()).ToString();
+                    response = JsonSerializer.Serialize(await ConsultantController.GetAppointment());
 
                 }
                 catch (Exception e)

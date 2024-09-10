@@ -9,11 +9,9 @@ namespace ConsultantMicroservice
         {
             _dbContext = dbContext;
         }
-        public async Task<int> GetAppointment()
+        public async Task<List<Shared.ConsultantModel>> GetAppointment()
         {
-            var result = _dbContext.Consultant.Count();
-            Debug.WriteLine($"consultant service - get appointment - result: {result}");
-            return result;
+            return _dbContext.Consultant.ToList();
         }
 
     }
