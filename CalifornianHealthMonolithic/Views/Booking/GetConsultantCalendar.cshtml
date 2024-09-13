@@ -8,8 +8,12 @@
 <section>
     <label for="consultant">Select Consultant you wish to make an appointment for</label>
     <div class="form-group">
+        @if(Model != null)
+            {
+
         @Html.DropDownListFor(m => m.selectedConsultantId, Model.ConsultantsList, "- Please select -", new { @class = "form-control", @onchange = "onChangeDropdown(this)" })
         @Html.ValidationMessageFor(m => m.selectedConsultantId)
+            }
     </div>
 
 </section>

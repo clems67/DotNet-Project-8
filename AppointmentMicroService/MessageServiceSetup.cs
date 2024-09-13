@@ -1,20 +1,19 @@
 ﻿using RabbitMQ.Client.Events;
 using RabbitMQ.Client;
-using System.Text;
-using AppointmentMicroService.Controllers;
 using System.Diagnostics;
-using System.Threading.Channels;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using AppointmentMicroService.Interfaces;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Shared;
 
-namespace AppointmentMicroService
+namespace ConsultantMicroservice
 {
     public class MessageServiceSetup
     {
-        public IAppointmentService AppointmentController { get; set; }
+        //public IConsultantService ConsultantController { get; set; }
         public MessageServiceSetup(IServiceProvider serviceProvider)
         {
-            this.AppointmentController = serviceProvider.GetService<IAppointmentService>();
+            //this.ConsultantController = serviceProvider.GetService<IConsultantService>();
         }
         public ConnectionFactory _connectionFactory = new ConnectionFactory
         {
@@ -30,7 +29,7 @@ namespace AppointmentMicroService
 
             _channel = _connection.CreateModel();
 
-            _channel.QueueDeclare(queue: "rpc_queue",
+            _channel.QueueDeclare(queue: "Appointment_queue",
                                  durable: false,
                                  exclusive: false,
                                  autoDelete: false,
@@ -38,7 +37,7 @@ namespace AppointmentMicroService
 
             _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
             var consumer = new EventingBasicConsumer(_channel);
-            _channel.BasicConsume(queue: "rpc_queue",
+            _channel.BasicConsume(queue: "Appointment_queue",
                 autoAck: false,
                 consumer: consumer);
             Debug.WriteLine("\n Connection microservice rabbitmq\n");
@@ -46,9 +45,12 @@ namespace AppointmentMicroService
             consumer.Received += async (model, ea) =>
             {
                 Debug.WriteLine("\nmicroservice called\n");
+                
                 string response = string.Empty;
 
                 var body = ea.Body.ToArray();
+                Debug.WriteLine($"body: " + body);
+                Debug.WriteLine("routing key: "+ ea.RoutingKey);
                 var props = ea.BasicProperties;
                 var replyProps = _channel.CreateBasicProperties();
                 replyProps.CorrelationId = props.CorrelationId;
@@ -56,8 +58,13 @@ namespace AppointmentMicroService
 
                 try
                 {
-                    response = (await AppointmentController.GetAppointment()).ToString();
-
+                    var objectToSend = new AppointmentModel() { 
+                        PatientName = "bob",
+                        ConsultantId = 1,
+                        startDate = new DateTime(2024, 09, 12),
+                        endDate = new DateTime(2024, 09, 12)
+                    };
+                    response = JsonSerializer.Serialize<AppointmentModel>(objectToSend);
                 }
                 catch (Exception e)
                 {
@@ -80,12 +87,8 @@ namespace AppointmentMicroService
                     {
                         Debug.WriteLine("\nERROR REPLYTO\n");
                     }
-
                 }
-
-
             };
         }
-
     }
 }

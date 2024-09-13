@@ -28,7 +28,7 @@ namespace ConsultantMicroservice
 
             _channel = _connection.CreateModel();
 
-            _channel.QueueDeclare(queue: "rpc_queue",
+            _channel.QueueDeclare(queue: "Consultant_queue",
                                  durable: false,
                                  exclusive: false,
                                  autoDelete: false,
@@ -36,7 +36,7 @@ namespace ConsultantMicroservice
 
             _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
             var consumer = new EventingBasicConsumer(_channel);
-            _channel.BasicConsume(queue: "rpc_queue",
+            _channel.BasicConsume(queue: "Consultant_queue",
                 autoAck: false,
                 consumer: consumer);
             Debug.WriteLine("\n Connection microservice rabbitmq\n");
@@ -57,7 +57,6 @@ namespace ConsultantMicroservice
                 try
                 {
                     response = JsonSerializer.Serialize(await ConsultantController.GetAppointment());
-
                 }
                 catch (Exception e)
                 {

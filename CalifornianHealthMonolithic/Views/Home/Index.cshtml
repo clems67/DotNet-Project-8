@@ -72,7 +72,7 @@
                 <h2 class="ser-title">Meet Our Doctors!</h2>
                 <hr class="botm-line">
             </div>
-            @if (Model.consultants != null)
+            @if (Model != null && Model.consultants != null)
             {
                 int i = 0;
                 foreach (var consultant in Model.consultants)
@@ -82,7 +82,7 @@
                         <div class="thumbnail">
                             <img src=@String.Format("img/doctor{0}.jpg", i) alt="..." class="team-img">
                             <div class="caption">
-                                <h3>@consultant.FName </h3>
+                                <h3>@consultant.FirstName </h3>
                                 <p>@consultant.Speciality</p>
                                 <ul class="list-inline">
                                     <li><a href="#"><i class="fa fa-facebook"></i></a></li>

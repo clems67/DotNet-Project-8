@@ -3,6 +3,7 @@ using CalifornianHealthMonolithic.Models;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Shared;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,26 +44,26 @@ namespace CalifornianHealthMonolithic.Controllers
         public System.Web.Mvc.ActionResult GetConsultantCalendar()
         {
             Debug.WriteLine("\nGetConsultantCalendar bookingController\n");
-            ConsultantModelList conList = new ConsultantModelList();
-            CHDBContext dbContext = new CHDBContext();
-            Repository repo = new Repository();
-            List<Consultant> cons = new List<Consultant>();
-            cons = repo.FetchConsultants(dbContext);
-            conList.ConsultantsList = new SelectList(cons, "Id", "FName");
-            conList.consultants = cons;
+            //ConsultantModelList conList = new ConsultantModelList();
+            //CHDBContext dbContext = new CHDBContext();
+            //Repository repo = new Repository();
+            //List<Consultant> cons = new List<Consultant>();
+            //cons = repo.FetchConsultants(dbContext);
+            //conList.ConsultantsList = new SelectList(cons, "Id", "FName");
+            //conList.consultants = cons;
 
             var rpcClient = new RpcClient();
 
             var response = rpcClient.CallAsync();
 
-            return View(conList);
+            return View(/*conList*/);
         }
 
         public class RpcClient : IDisposable
         {
             private readonly string exchangeName = string.Empty;
             private readonly string routingKey = "GET_APPOINTMENT";
-            private const string QUEUE_NAME = "rpc_queue";
+            private const string QUEUE_NAME = "Appointment_queue";
 
             private IConnection connection;
             private IModel channel;
@@ -85,9 +86,9 @@ namespace CalifornianHealthMonolithic.Controllers
                         return;
                     var body = ea.Body.ToArray();
                     var response = Encoding.UTF8.GetString(body);
-                    List<ConsultantModelv2> consultantModelv2s = JsonConvert.DeserializeObject<List<ConsultantModelv2>>(response);
+                    AppointmentModel consultantModelv2s = JsonConvert.DeserializeObject<AppointmentModel>(response);
                     Debug.WriteLine($"the response in controller : {response}");
-                    Debug.WriteLine(consultantModelv2s.First().FirstName.ToString());
+                    Debug.WriteLine(consultantModelv2s.PatientName + "\n");
                     tcs.TrySetResult(response);
                 };
 

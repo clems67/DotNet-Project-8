@@ -231,7 +231,12 @@
     <Content Include="Views\Booking\GetConsultantCalendar.cshtml" />
     <Content Include="Views\Booking\ConfirmAppointment.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj">
+      <Project>{f5cc6d46-237e-4ddf-bc4c-8745cfae9b3a}</Project>
+      <Name>Shared</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

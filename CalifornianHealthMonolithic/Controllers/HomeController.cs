@@ -13,14 +13,14 @@ namespace CalifornianHealthMonolithic.Controllers
     {
         public ActionResult Index()
         {
-            ConsultantModelList conList = new ConsultantModelList();
-            CHDBContext dbContext = new CHDBContext();
-            Repository repo = new Repository();
-            List<Consultant> cons = new List<Consultant>();
-            cons = repo.FetchConsultants(dbContext);
-            conList.ConsultantsList = new SelectList(cons, "Id", "FName");
-            conList.consultants = cons;
-            return View(conList);
+            //ConsultantModelList conList = new ConsultantModelList();
+            //CHDBContext dbContext = new CHDBContext();
+            //Repository repo = new Repository();
+            //List<Consultant> cons = new List<Consultant>();
+            //cons = repo.FetchConsultants(dbContext);
+            //conList.ConsultantsList = new SelectList(cons, "Id", "FName");
+            //conList.consultants = cons;
+            return View(/*conList*/);
         }
 
         public ActionResult About()
