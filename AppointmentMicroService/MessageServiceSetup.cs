@@ -5,24 +5,44 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using Shared;
+using System.Net.Http.Json;
 
-namespace ConsultantMicroservice
+namespace AppointmentMicroservice
 {
     public class MessageServiceSetup
     {
-        //public IConsultantService ConsultantController { get; set; }
+        public IAppointmentService AppointmentService { get; set; }
         public MessageServiceSetup(IServiceProvider serviceProvider)
         {
-            //this.ConsultantController = serviceProvider.GetService<IConsultantService>();
+            this.AppointmentService = serviceProvider.GetService<IAppointmentService>();
         }
         public ConnectionFactory _connectionFactory = new ConnectionFactory
         {
             HostName = "localhost",
-            RequestedHeartbeat = System.TimeSpan.Parse("10"),
+            RequestedHeartbeat = TimeSpan.Parse("10"),
             AutomaticRecoveryEnabled = true
         };
         public IConnection _connection { get; set; }
         public IModel _channel { get; set; }
+
+        public AppointmentCommunicationModel MessageHandler(AppointmentCommunicationModel questionModel)
+        {
+            var response = new AppointmentCommunicationModel(){};
+            if (questionModel.AccessTypeSelected == AppointmentCommunicationModel.AccessType.getAppointments)
+            {
+                response.Appointments = AppointmentService.GetRecentAppointments();
+            }
+            if (questionModel.AccessTypeSelected == AppointmentCommunicationModel.AccessType.createNewAppointment)
+            {
+                response.IsAppointmentsCreated = AppointmentService.CreateAppointment(questionModel.AppointmentToCreate);                
+            }
+            else
+            {
+                response.AccessTypeSelected = AppointmentCommunicationModel.AccessType.error;
+            }
+            return response;
+        }
+
         public async void Setup()
         {
             _connection = _connectionFactory.CreateConnection();
@@ -45,31 +65,30 @@ namespace ConsultantMicroservice
             consumer.Received += async (model, ea) =>
             {
                 Debug.WriteLine("\nmicroservice called\n");
-                
-                string response = string.Empty;
-
                 var body = ea.Body.ToArray();
                 Debug.WriteLine($"body: " + body);
-                Debug.WriteLine("routing key: "+ ea.RoutingKey);
+                Debug.WriteLine("routing key: " + ea.RoutingKey);
                 var props = ea.BasicProperties;
                 var replyProps = _channel.CreateBasicProperties();
                 replyProps.CorrelationId = props.CorrelationId;
                 _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
+                string response = string.Empty;
                 try
                 {
-                    var objectToSend = new AppointmentModel() { 
-                        PatientName = "bob",
-                        ConsultantId = 1,
-                        startDate = new DateTime(2024, 09, 12),
-                        endDate = new DateTime(2024, 09, 12)
-                    };
-                    response = JsonSerializer.Serialize<AppointmentModel>(objectToSend);
+                    var questionString = Encoding.UTF8.GetString(body);
+                    var question = JsonSerializer.Deserialize<AppointmentCommunicationModel>(questionString);
+                    response = JsonSerializer.Serialize(MessageHandler(question));
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine($"\nERROR MICROSERVICE\n [.] {e.Message}");
-                    response = string.Empty;
+                    response = JsonSerializer.Serialize(
+                        new AppointmentCommunicationModel()
+                        {
+                            AccessTypeSelected = AppointmentCommunicationModel.AccessType.error
+                        }
+                        );
                 }
                 finally
                 {

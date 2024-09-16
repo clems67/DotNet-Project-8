@@ -44,7 +44,7 @@ namespace AppointmentMicroservice.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Consultant");
+                    b.ToTable("Appointment");
                 });
 #pragma warning restore 612, 618
         }

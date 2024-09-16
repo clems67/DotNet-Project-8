@@ -12,7 +12,7 @@ namespace AppointmentMicroservice.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Consultant",
+                name: "Appointment",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -32,7 +32,7 @@ namespace AppointmentMicroservice.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Consultant");
+                name: "Appointment");
         }
     }
 }

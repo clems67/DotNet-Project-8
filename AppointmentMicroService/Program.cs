@@ -1,4 +1,3 @@
-using ConsultantMicroservice;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentMicroservice
@@ -13,6 +12,8 @@ namespace AppointmentMicroservice
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
+
+            builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
             builder.Services.AddDbContext<AppointmentDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("WebApiDatabase")));

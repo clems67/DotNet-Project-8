@@ -85,11 +85,10 @@ namespace CalifornianHealthMonolithic.Controllers
                     if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
                         return;
                     var body = ea.Body.ToArray();
-                    var response = Encoding.UTF8.GetString(body);
-                    AppointmentModel consultantModelv2s = JsonConvert.DeserializeObject<AppointmentModel>(response);
-                    Debug.WriteLine($"the response in controller : {response}");
-                    Debug.WriteLine(consultantModelv2s.PatientName + "\n");
-                    tcs.TrySetResult(response);
+                    var responseString = Encoding.UTF8.GetString(body);
+                    AppointmentCommunicationModel response = JsonConvert.DeserializeObject<AppointmentCommunicationModel>(responseString);
+                    Debug.WriteLine($"the response in controller : {response.Appointments.First()}");
+                    tcs.TrySetResult(responseString);
                 };
 
                 channel.BasicConsume(consumer: consumer,
@@ -104,7 +103,8 @@ namespace CalifornianHealthMonolithic.Controllers
                 var correlationId = Guid.NewGuid().ToString();
                 props.CorrelationId = correlationId;
                 props.ReplyTo = replyQueueName;
-                var messageBytes = Encoding.UTF8.GetBytes("message that has been setup in BookingController");
+                var message = JsonConvert.SerializeObject(new AppointmentCommunicationModel() { AccessTypeSelected = AppointmentCommunicationModel.AccessType.getAppointments });
+                var messageBytes = Encoding.UTF8.GetBytes(message);
                 var tcs = new TaskCompletionSource<string>();
                 callbackMapper.TryAdd(correlationId, tcs);
 
