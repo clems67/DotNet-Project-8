@@ -20,9 +20,12 @@ namespace AppointmentMicroservice
             return true;
         }
 
-        public List<AppointmentModel> GetRecentAppointments()
+        public List<AppointmentModel> GetRecentAppointments(int id)
         {
-            return _dbContext.Appointment.Where(a => a.endDate > DateTime.Now).ToList();
+            return _dbContext.Appointment
+                .Where(a => a.ConsultantId == id)
+                .Where(a => a.endDate > DateTime.Now)
+                .ToList();
         }
     }
 }

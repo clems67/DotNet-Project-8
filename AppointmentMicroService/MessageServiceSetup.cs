@@ -28,11 +28,12 @@ namespace AppointmentMicroservice
         public AppointmentCommunicationModel MessageHandler(AppointmentCommunicationModel questionModel)
         {
             var response = new AppointmentCommunicationModel(){};
+
             if (questionModel.AccessTypeSelected == AppointmentCommunicationModel.AccessType.getAppointments)
             {
-                response.Appointments = AppointmentService.GetRecentAppointments();
+                response.Appointments = AppointmentService.GetRecentAppointments(questionModel.ConsultantIdSelected);
             }
-            if (questionModel.AccessTypeSelected == AppointmentCommunicationModel.AccessType.createNewAppointment)
+            else if (questionModel.AccessTypeSelected == AppointmentCommunicationModel.AccessType.createNewAppointment)
             {
                 response.IsAppointmentsCreated = AppointmentService.CreateAppointment(questionModel.AppointmentToCreate);                
             }

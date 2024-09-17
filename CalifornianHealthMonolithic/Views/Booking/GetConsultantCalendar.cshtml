@@ -24,10 +24,7 @@
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 <script>
-    function onChangeDropdown(element) {
-        console.log("onchange triggered: " + element.options[element.value].innerHTML);
-        console.log("onchange triggered: " + element.value);
-
+    function getConsultantCalendar(id) {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'timeGridWeek',
@@ -38,11 +35,28 @@
             weekends: false
         });
         calendar.render();
-        calendar.addEventSource({
-            events: [
-                { title: 'New Event', start: '2024-09-05T15:00:00', end: '2024-09-05T15:30:00' },
-            ]
-        });
+
+        var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + id;
+        fetch(url, { method: "GET"})
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+                for (let i = 0; i < data.Appointments.length; i++) {
+                    calendar.addEventSource({
+                        events: [
+                            { title: 'Appointment', start: data.Appointments[i].startDate, end: data.Appointments[i].endDate }
+                        ]
+                    });
+                }
+            });
+    }
+
+    function onChangeDropdown(element) {
+        console.log("onchange triggered: " + element.options[element.value].innerHTML);
+        console.log("onchange triggered: " + element.value);
+
+        getConsultantCalendar(element.value)
     }
 
     function handleDateClick(info) {
@@ -65,38 +79,10 @@
             .then(data => {
                 console.log(data)
             })
-
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            firstDay: 1,
-            selectable: true,
-            slotMinTime: '08:00',
-            dateClick: handleDateClick,
-            weekends: false
-        });
-        calendar.render();
-        calendar.addEventSource({
-            events: [
-                { title: 'New Event', start: '2024-09-04T15:00:00', end: '2024-09-04T15:30:00' },
-                { title: 'Another Event', start: '2024-09-05T10:00:00', end: '2024-09-05T10:30:00' }
-            ]
-        });
-
-        fetch("http://localhost:55258/Booking/TestGetMethod/1", {
-            method: "GET"
-        })
-            .then(response => {
-                return response.json()
-            })
-            .then(data => {
-                console.log(data);
-                console.log(data.consultantId);
-                console.log(data.patientName);
-            });
+        getConsultantCalendar(1)
     });
 </script>

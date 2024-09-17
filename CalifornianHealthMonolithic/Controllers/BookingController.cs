@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,13 +24,11 @@ namespace CalifornianHealthMonolithic.Controllers
     }
     public class BookingController : Controller
     {
-
-
         [System.Web.Mvc.HttpPost]
         public string TestPostMethod(CreateAppointmentDto createAppointmentDto)
         {
             Debug.WriteLine($"\nTestMehod consultantId: {createAppointmentDto.consultantId}\n");
-            Debug.WriteLine("conflict"); 
+            Debug.WriteLine("conflict");
             return "409";
         }
         [System.Web.Mvc.HttpGet]
@@ -38,12 +37,8 @@ namespace CalifornianHealthMonolithic.Controllers
             var returnedValue = new CreateAppointmentDto() { consultantId = 1, patientName = "bob" };
             return JsonConvert.SerializeObject(returnedValue);
         }
-        // GET: Booking
-        //TODO: Change this method to display the consultant calendar. Ensure that the user can have a real time view of 
-        //the consultant's availability;
         public System.Web.Mvc.ActionResult GetConsultantCalendar()
         {
-            Debug.WriteLine("\nGetConsultantCalendar bookingController\n");
             //ConsultantModelList conList = new ConsultantModelList();
             //CHDBContext dbContext = new CHDBContext();
             //Repository repo = new Repository();
@@ -52,11 +47,25 @@ namespace CalifornianHealthMonolithic.Controllers
             //conList.ConsultantsList = new SelectList(cons, "Id", "FName");
             //conList.consultants = cons;
 
-            var rpcClient = new RpcClient();
-
-            var response = rpcClient.CallAsync();
-
             return View(/*conList*/);
+        }
+            [System.Web.Mvc.HttpGet]
+        public string GetConsultantCalendarRequest(int id)
+        {
+            var rpcClient = new RpcClient();
+            var response = rpcClient.CallAsync(id);
+
+            var timeoutCounter = 0;
+            while(rpcClient.communicationModel == null)
+            {
+                timeoutCounter += 1;
+                Thread.Sleep(100);
+                if(timeoutCounter == 150)
+                {
+                    return JsonConvert.SerializeObject(new AppointmentCommunicationModel { AccessTypeSelected = AppointmentCommunicationModel.AccessType.overtime});
+                }
+            }
+            return JsonConvert.SerializeObject(rpcClient.communicationModel);           
         }
 
         public class RpcClient : IDisposable
@@ -69,6 +78,7 @@ namespace CalifornianHealthMonolithic.Controllers
             private IModel channel;
             private string replyQueueName;
             private ConcurrentDictionary<string, TaskCompletionSource<string>> callbackMapper = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
+            internal AppointmentCommunicationModel communicationModel;
 
             public RpcClient()
             {
@@ -86,8 +96,7 @@ namespace CalifornianHealthMonolithic.Controllers
                         return;
                     var body = ea.Body.ToArray();
                     var responseString = Encoding.UTF8.GetString(body);
-                    AppointmentCommunicationModel response = JsonConvert.DeserializeObject<AppointmentCommunicationModel>(responseString);
-                    Debug.WriteLine($"the response in controller : {response.Appointments.First()}");
+                    communicationModel = JsonConvert.DeserializeObject<AppointmentCommunicationModel>(responseString);
                     tcs.TrySetResult(responseString);
                 };
 
@@ -96,14 +105,20 @@ namespace CalifornianHealthMonolithic.Controllers
                                      autoAck: false);
             }
 
-            public Task<string> CallAsync(CancellationToken cancellationToken = default)
+            public Task<string> CallAsync(int id, CancellationToken cancellationToken = default)
             {
                 Debug.WriteLine("\nCallAsync\n");
                 IBasicProperties props = channel.CreateBasicProperties();
                 var correlationId = Guid.NewGuid().ToString();
                 props.CorrelationId = correlationId;
                 props.ReplyTo = replyQueueName;
-                var message = JsonConvert.SerializeObject(new AppointmentCommunicationModel() { AccessTypeSelected = AppointmentCommunicationModel.AccessType.getAppointments });
+
+                var communicationModel = new AppointmentCommunicationModel()
+                {
+                    AccessTypeSelected = AppointmentCommunicationModel.AccessType.getAppointments,
+                    ConsultantIdSelected = id
+                };
+                var message = JsonConvert.SerializeObject(communicationModel);
                 var messageBytes = Encoding.UTF8.GetBytes(message);
                 var tcs = new TaskCompletionSource<string>();
                 callbackMapper.TryAdd(correlationId, tcs);
