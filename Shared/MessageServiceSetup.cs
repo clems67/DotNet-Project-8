@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Shared
 {
@@ -59,13 +59,14 @@ namespace Shared
                 try
                 {
                     var questionString = Encoding.UTF8.GetString(body);
-                    var question = JsonSerializer.Deserialize<CommunicationModel>(questionString);
-                    response = JsonSerializer.Serialize(MessageHandler(question));
+                    var question = Newtonsoft.Json.JsonConvert.DeserializeObject<CommunicationModel>(questionString);
+                    var responseObject = MessageHandler(question);
+                    response = JsonConvert.SerializeObject(responseObject);
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine($"\nERROR MICROSERVICE\n [.] {e.Message}");
-                    response = JsonSerializer.Serialize(
+                    response = JsonConvert.SerializeObject(
                         new CommunicationModel()
                         {
                             AccessTypeSelected = CommunicationModel.AccessType.error

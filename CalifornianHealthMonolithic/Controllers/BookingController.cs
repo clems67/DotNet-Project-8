@@ -41,15 +41,7 @@ namespace CalifornianHealthMonolithic.Controllers
         }
         public System.Web.Mvc.ActionResult GetConsultantCalendar()
         {
-            //ConsultantModelList conList = new ConsultantModelList();
-            //CHDBContext dbContext = new CHDBContext();
-            //Repository repo = new Repository();
-            //List<Consultant> cons = new List<Consultant>();
-            //cons = repo.FetchConsultants(dbContext);
-            //conList.ConsultantsList = new SelectList(cons, "Id", "FName");
-            //conList.consultants = cons;
-
-            return View(/*conList*/);
+            return View();
         }
         [System.Web.Mvc.HttpGet]
         public string GetConsultantCalendarRequest(int id)

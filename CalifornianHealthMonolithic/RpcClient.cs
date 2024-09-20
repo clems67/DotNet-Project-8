@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Web;
+using Microsoft.Ajax.Utilities;
 
 namespace CalifornianHealthMonolithic
 {
@@ -46,7 +47,8 @@ namespace CalifornianHealthMonolithic
                 {
                     communicationModel = JsonConvert.DeserializeObject<CommunicationModel>(responseString);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Debug.WriteLine(ex.Message);
                 }
                 tcs.TrySetResult(responseString);

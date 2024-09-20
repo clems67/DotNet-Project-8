@@ -9,7 +9,7 @@ namespace ConsultantMicroservice
         {
             _dbContext = dbContext;
         }
-        public async Task<List<Shared.ConsultantModel>> GetAppointment()
+        public List<Shared.ConsultantModel> GetConsultants()
         {
             return _dbContext.Consultant.ToList();
         }

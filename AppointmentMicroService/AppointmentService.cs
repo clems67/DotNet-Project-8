@@ -24,7 +24,7 @@ namespace AppointmentMicroservice
         {
             return _dbContext.Appointment
                 .Where(a => a.ConsultantId == id)
-                .Where(a => a.endDate > DateTime.Now)
+                .Where(a => a.startDate > DateTime.Now)
                 .ToList();
         }
     }
