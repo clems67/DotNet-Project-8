@@ -24,6 +24,8 @@ namespace CalifornianHealthMonolithic.Controllers
     }
     public class BookingController : Controller
     {
+        private RpcClient rpcClient = new RpcClient("Appointment_queue");
+
         [System.Web.Mvc.HttpPost]
         public string TestPostMethod(CreateAppointmentDto createAppointmentDto)
         {
@@ -49,97 +51,33 @@ namespace CalifornianHealthMonolithic.Controllers
 
             return View(/*conList*/);
         }
-            [System.Web.Mvc.HttpGet]
+        [System.Web.Mvc.HttpGet]
         public string GetConsultantCalendarRequest(int id)
         {
-            var rpcClient = new RpcClient();
-            var response = rpcClient.CallAsync(id);
+            var response = rpcClient.CallAsync(
+                new CommunicationModel
+                {
+                    AccessTypeSelected = CommunicationModel.AccessType.getAppointments,
+                    ConsultantIdSelected = id
+                }
+            );
 
             var timeoutCounter = 0;
-            while(rpcClient.communicationModel == null)
+            while (rpcClient.communicationModel == null)
             {
                 timeoutCounter += 1;
                 Thread.Sleep(100);
-                if(timeoutCounter == 150)
+                if (timeoutCounter == 150)
                 {
-                    return JsonConvert.SerializeObject(new AppointmentCommunicationModel { AccessTypeSelected = AppointmentCommunicationModel.AccessType.overtime});
+                    return JsonConvert.SerializeObject(new CommunicationModel { AccessTypeSelected = CommunicationModel.AccessType.overtime });
                 }
             }
-            return JsonConvert.SerializeObject(rpcClient.communicationModel);           
+            return JsonConvert.SerializeObject(rpcClient.communicationModel);
         }
 
-        public class RpcClient : IDisposable
-        {
-            private readonly string exchangeName = string.Empty;
-            private readonly string routingKey = "GET_APPOINTMENT";
-            private const string QUEUE_NAME = "Appointment_queue";
 
-            private IConnection connection;
-            private IModel channel;
-            private string replyQueueName;
-            private ConcurrentDictionary<string, TaskCompletionSource<string>> callbackMapper = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
-            internal AppointmentCommunicationModel communicationModel;
 
-            public RpcClient()
-            {
-                Debug.WriteLine("\nSetup connection\n");
-                var factory = new ConnectionFactory { HostName = "localhost" };
-
-                connection = factory.CreateConnection();
-                channel = connection.CreateModel();
-                // declare a server-named queue
-                replyQueueName = channel.QueueDeclare().QueueName;
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
-                {
-                    if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
-                        return;
-                    var body = ea.Body.ToArray();
-                    var responseString = Encoding.UTF8.GetString(body);
-                    communicationModel = JsonConvert.DeserializeObject<AppointmentCommunicationModel>(responseString);
-                    tcs.TrySetResult(responseString);
-                };
-
-                channel.BasicConsume(consumer: consumer,
-                                     queue: replyQueueName,
-                                     autoAck: false);
-            }
-
-            public Task<string> CallAsync(int id, CancellationToken cancellationToken = default)
-            {
-                Debug.WriteLine("\nCallAsync\n");
-                IBasicProperties props = channel.CreateBasicProperties();
-                var correlationId = Guid.NewGuid().ToString();
-                props.CorrelationId = correlationId;
-                props.ReplyTo = replyQueueName;
-
-                var communicationModel = new AppointmentCommunicationModel()
-                {
-                    AccessTypeSelected = AppointmentCommunicationModel.AccessType.getAppointments,
-                    ConsultantIdSelected = id
-                };
-                var message = JsonConvert.SerializeObject(communicationModel);
-                var messageBytes = Encoding.UTF8.GetBytes(message);
-                var tcs = new TaskCompletionSource<string>();
-                callbackMapper.TryAdd(correlationId, tcs);
-
-                channel.BasicPublish(exchange: string.Empty,
-                                     routingKey: QUEUE_NAME,
-                                     basicProperties: props,
-                                     body: messageBytes);
-
-                cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
-                return tcs.Task;
-            }
-
-            public void Dispose()
-            {
-                channel.Close();
-                connection.Close();
-            }
-        }
-
-        //TODO: Change this method to ensure that members do not have to wait endlessly. 
+        //TODO: Change this method to ensure that members do not have to wait endlessly.
         public System.Web.Mvc.ActionResult ConfirmAppointment(Appointment model)
         {
             CHDBContext dbContext = new CHDBContext();
