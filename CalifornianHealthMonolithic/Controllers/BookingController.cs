@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
@@ -25,7 +26,6 @@ namespace CalifornianHealthMonolithic.Controllers
     public class BookingController : Controller
     {
         private RpcClient rpcClient = new RpcClient("Appointment_queue");
-
         [System.Web.Mvc.HttpPost]
         public string TestPostMethod(CreateAppointmentDto createAppointmentDto)
         {
@@ -39,9 +39,39 @@ namespace CalifornianHealthMonolithic.Controllers
             var returnedValue = new CreateAppointmentDto() { consultantId = 1, patientName = "bob" };
             return JsonConvert.SerializeObject(returnedValue);
         }
-        public System.Web.Mvc.ActionResult GetConsultantCalendar()
+        [System.Web.Mvc.HttpGet]
+        public async Task<ActionResult> GetConsultantCalendar()
         {
-            return View();
+            //var response = new ConsultantModelList();
+            //var consultants = new List<Models.ConsultantModel>();
+            //consultants.Add(new Models.ConsultantModel { id = 1, fname = "Jessica" });
+            //consultants.Add(new Models.ConsultantModel { id = 2, fname = "lai" });
+            //consultants.Add(new Models.ConsultantModel { id = 3, fname = "Amanda" });
+            //consultants.Add(new Models.ConsultantModel { id = 4, fname = "Jason" });
+            //response.ConsultantsList = new SelectList(consultants, "Id", "fname");
+
+            HttpClient httpClient = new HttpClient();
+            var responseContent = await (await httpClient.GetAsync("http://localhost:55258/Home/GetConsultants")).Content.ReadAsStringAsync();
+            var fagr= "";
+            var communicationModel = JsonConvert.DeserializeObject<CommunicationModel>(responseContent);
+
+            var consultants = new List<Models.ConsultantModel>();
+            foreach (var consultant in communicationModel.Consultants)
+            {
+                consultants.Add(new Models.ConsultantModel
+                {
+                    id = consultant.Id,
+                    fname = consultant.FirstName,
+                    lname = consultant.LastName,
+                    speciality = consultant.Speciality,
+                });
+            }
+            var consultantModelList = new ConsultantModelList()
+            {
+                consultants = consultants,
+                ConsultantsList = new SelectList(consultants, "Id", "FName")
+            };
+            return View(consultantModelList);
         }
         [System.Web.Mvc.HttpGet]
         public string GetConsultantCalendarRequest(int id)

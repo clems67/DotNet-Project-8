@@ -16,8 +16,7 @@ namespace CalifornianHealthMonolithic.Controllers
     {
         private RpcClient rpcClient = new RpcClient("Consultant_queue");
 
-        [System.Web.Mvc.HttpGet]
-        public CommunicationModel GetConsultantList()
+        private CommunicationModel GetConsultantsList()
         {
             var response = rpcClient.CallAsync(
                 new CommunicationModel
@@ -36,9 +35,16 @@ namespace CalifornianHealthMonolithic.Controllers
             }
             return rpcClient.communicationModel;
         }
+
+        [System.Web.Mvc.HttpGet]
+        public string GetConsultants()
+        {
+            return JsonConvert.SerializeObject(GetConsultantsList());
+        }
+
         public ActionResult Index()
         {
-            var value = GetConsultantList();
+            var value = GetConsultantsList();
             if (value.AccessTypeSelected == CommunicationModel.AccessType.getConsultants)
             {
                 var response = new List<Models.ConsultantModel>();
