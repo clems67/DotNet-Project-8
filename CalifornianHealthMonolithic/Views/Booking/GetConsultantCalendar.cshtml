@@ -5,18 +5,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section>
-    <label for="consultant">Select Consultant you wish to make an appointment for</label>
-    <div class="form-group">
-        @if(Model != null)
+<div style="display:flex; margin:20px auto; justify-content:center">
+    <section>
+        <label for="consultant">Select Consultant you wish to make an appointment for</label>
+        <div class="form-group" style="width:240px">
+            @if (Model != null)
             {
 
-        @Html.DropDownListFor(m => m.selectedConsultantId, Model.ConsultantsList, "- Please select -", new { @class = "form-control", @onchange = "onChangeDropdown(this)" })
-        @Html.ValidationMessageFor(m => m.selectedConsultantId)
+                @Html.DropDownListFor(m => m.selectedConsultantId, Model.ConsultantsList, "- Please select Consultant -", new { @class = "form-control", @onchange = "onChangeDropdown(this)" })
+                @Html.ValidationMessageFor(m => m.selectedConsultantId)
             }
-    </div>
-
-</section>
+        </div>
+    </section>
+</div>
 
 <section style="max-width:1000px; margin: 0 auto">
     <div id='calendar'></div>
@@ -24,6 +25,8 @@
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 <script>
+    var consultantIdSelected = 0;
+
     function getConsultantCalendar(id) {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -37,7 +40,7 @@
         calendar.render();
 
         var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + id;
-        fetch(url, { method: "GET"})
+        fetch(url, { method: "GET" })
             .then(response => {
                 return response.json()
             })
@@ -55,7 +58,7 @@
     function onChangeDropdown(element) {
         console.log("onchange triggered: " + element.options[element.value].innerHTML);
         console.log("onchange triggered: " + element.value);
-
+        consultantIdSelected = element.value
         getConsultantCalendar(element.value)
     }
 
@@ -67,18 +70,28 @@
         else if (hourSelected < 8 || hourSelected >= 18 || hourSelected == 12) {
             alert('the date you selected is outside the working hours')
         } else {
-            alert('time selected: ' + info.dateStr);
-            fetch("http://localhost:55258/Booking/TestPostMethod", {
+            //alert('time selected: ' + info.dateStr);
+            console.log(new Date(info.dateStr))
+            name = prompt("enter your name");
+            fetch("http://localhost:55258/Booking/BookAppointment", {
                 method: "POST",
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    consultantId: 0,
-                    patientName: "bob"
+                    PatientName: name,
+                    ConsultantId: consultantIdSelected,
+                    startDate: new Date(info.dateStr),
                 })
             })
-            .then(data => data.json())
-            .then(data => {
-                console.log(data)
-            })
+                .then(data => data.json())
+                .then(data => {
+                    if (data == "200") {
+                        alert("Appointment successfully booked !")
+                    } else if (date = "409") {
+                        alert("ERROR : the date selected is already booked")
+                    } else {
+                        alert("ERROR")
+                    }
+                })
         }
     }
 

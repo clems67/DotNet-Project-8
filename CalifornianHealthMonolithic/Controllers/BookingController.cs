@@ -14,6 +14,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Mvc;
 
 namespace CalifornianHealthMonolithic.Controllers
@@ -42,17 +43,9 @@ namespace CalifornianHealthMonolithic.Controllers
         [System.Web.Mvc.HttpGet]
         public async Task<ActionResult> GetConsultantCalendar()
         {
-            //var response = new ConsultantModelList();
-            //var consultants = new List<Models.ConsultantModel>();
-            //consultants.Add(new Models.ConsultantModel { id = 1, fname = "Jessica" });
-            //consultants.Add(new Models.ConsultantModel { id = 2, fname = "lai" });
-            //consultants.Add(new Models.ConsultantModel { id = 3, fname = "Amanda" });
-            //consultants.Add(new Models.ConsultantModel { id = 4, fname = "Jason" });
-            //response.ConsultantsList = new SelectList(consultants, "Id", "fname");
-
             HttpClient httpClient = new HttpClient();
             var responseContent = await (await httpClient.GetAsync("http://localhost:55258/Home/GetConsultants")).Content.ReadAsStringAsync();
-            var fagr= "";
+            var fagr = "";
             var communicationModel = JsonConvert.DeserializeObject<CommunicationModel>(responseContent);
 
             var consultants = new List<Models.ConsultantModel>();
@@ -91,25 +84,48 @@ namespace CalifornianHealthMonolithic.Controllers
                 Thread.Sleep(100);
                 if (timeoutCounter == 150)
                 {
-                    return JsonConvert.SerializeObject(new CommunicationModel { AccessTypeSelected = CommunicationModel.AccessType.overtime });
+                    return "503"; //Service Unavailable error
                 }
             }
             return JsonConvert.SerializeObject(rpcClient.communicationModel);
         }
 
-
-
-        //TODO: Change this method to ensure that members do not have to wait endlessly.
-        public System.Web.Mvc.ActionResult ConfirmAppointment(Appointment model)
+        [System.Web.Mvc.HttpPost]
+        public string BookAppointment([FromBody] AppointmentModel appointmentModel)
         {
-            CHDBContext dbContext = new CHDBContext();
+            //CommunicationModel communicationModel = new CommunicationModel
+            //{
+            //    AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,
+            //    AppointmentToCreate = new AppointmentModel
+            //    {
+            //        PatientName = PatientName,
+            //        ConsultantId = ConsultantId,
+            //        startDate = startDate
+            //        //endDate = dateTime + TimeSpan.FromMinutes(30)
+            //    }
+            //};
+            var communicationModel = new CommunicationModel
+            {
+                AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,
+                AppointmentToCreate = appointmentModel
+            };
+            var response = rpcClient.CallAsync(communicationModel);
 
-            //Code to create appointment in database
-            //This needs to be reassessed. Before confirming the appointment, should we check if the consultant calendar is still available?
-            Repository repo = new Repository();
-            var result = repo.CreateAppointment(model, dbContext);
-
-            return View();
+            var timeoutCounter = 0;
+            while (rpcClient.communicationModel == null)
+            {
+                timeoutCounter += 1;
+                Thread.Sleep(100);
+                if (timeoutCounter == 150)
+                {
+                    return "503"; //Service Unavailable error
+                }
+            }
+            if (rpcClient != null && rpcClient.communicationModel != null)
+            {
+                return rpcClient.communicationModel.IsAppointmentsCreated ? "200" : "409"; //OK or Conflict
+            }
+            return "500";
         }
     }
 }

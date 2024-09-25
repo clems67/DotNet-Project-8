@@ -13,10 +13,16 @@ namespace AppointmentMicroservice
 
         public bool CreateAppointment(AppointmentModel appointment)
         {
-            if (_dbContext.Appointment.Any(a => a.startDate == appointment.startDate)) {
+            bool alreadyBooked = _dbContext.Appointment
+                .Where(a => a.ConsultantId == appointment.ConsultantId)
+                .Where(a => a.startDate == appointment.startDate)
+                .Any();
+            if (alreadyBooked) {
                 return false;
             };
+            appointment.endDate = appointment.startDate.AddMinutes(30);
             _dbContext.Appointment.Add(appointment);
+            _dbContext.SaveChanges();
             return true;
         }
 
