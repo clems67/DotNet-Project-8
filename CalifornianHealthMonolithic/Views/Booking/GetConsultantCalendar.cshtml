@@ -5,6 +5,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<div style="position: fixed; top: 15vh; width:100%">
+    <div id="snackbar" style="display:flex; position:absolute; justify-content:flex-end; z-index:999; visibility:hidden; left:75%; padding: 20px; border-radius:5px;"></div>
+</div>
+
 <div style="display:flex; margin:20px auto; justify-content:center">
     <section>
         <label for="consultant">Select Consultant you wish to make an appointment for</label>
@@ -23,9 +27,40 @@
     <div id='calendar'></div>
 </section>
 
+<style>
+    #snackbar.loading_consultant {
+        background: orange;
+        visibility: visible !important;
+    }
+
+    #snackbar.loading_calendar {
+        background: orange;
+        visibility: visible !important;
+    }
+
+    #snackbar.calendar_loaded {
+        background: blue;
+        visibility: visible !important;
+    }
+
+    #snackbar.appointment_booked {
+        background: green;
+        visibility: visible !important;
+    }
+
+    #snackbar.error {
+        background: red;
+        visibility: visible !important;
+    }
+</style>
+
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 <script>
     var consultantIdSelected = 0;
+
+    function sleep(milliseconds) {
+        while ((new Date().getTime()) < new Date().getTime() + milliseconds) { }
+    }
 
     function getConsultantCalendar(id) {
         var calendarEl = document.getElementById('calendar');
@@ -52,10 +87,21 @@
                         ]
                     });
                 }
+                var snackbar = document.getElementById('snackbar')
+                snackbar.classList.remove('loading_calendar')
+                snackbar.classList.add('calendar_loaded')
+                snackbar.textContent = "Calendar loaded !"
+                setTimeout(() => {
+                    snackbar.classList.remove('calendar_loaded')
+                }, 3000)
             });
     }
 
     function onChangeDropdown(element) {
+        var snackbar = document.getElementById('snackbar')
+        snackbar.classList.add('loading_calendar')
+        snackbar.textContent = "Loading calendar..."
+
         console.log("onchange triggered: " + element.options[element.value].innerHTML);
         console.log("onchange triggered: " + element.value);
         consultantIdSelected = element.value
@@ -75,7 +121,7 @@
             name = prompt("enter your name");
             fetch("http://localhost:55258/Booking/BookAppointment", {
                 method: "POST",
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     PatientName: name,
                     ConsultantId: consultantIdSelected,
@@ -84,13 +130,22 @@
             })
                 .then(data => data.json())
                 .then(data => {
+                    var snackbar = document.getElementById('snackbar')
                     if (data == "200") {
-                        alert("Appointment successfully booked !")
+                        snackbar.classList.add('appointment_booked')
+                        snackbar.textContent = "Appointment successfully booked !"
                     } else if (date = "409") {
-                        alert("ERROR : the date selected is already booked")
+                        snackbar.classList.add('error')
+                        snackbar.textContent = "ERROR: appontment already booked !"
                     } else {
-                        alert("ERROR")
+                        snackbar.classList.add('error')
+                        snackbar.textContent = "ERROR"
                     }
+                    setTimeout(() => {
+                        snackbar.classList.remove('appointment_booked')
+                        snackbar.classList.remove('error')
+                    }, 3000)
+                    getConsultantCalendar(consultantIdSelected)
                 })
         }
     }
