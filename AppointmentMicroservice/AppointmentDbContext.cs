@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AppointmentMicroservice
 {
-    public class AppointmentDbContext : DbContext
+    public class AppointmentDbContext : DbContext, IAppointmentDbContext
     {
         private readonly IConfiguration _configuration;
         public AppointmentDbContext(DbContextOptions<AppointmentDbContext> dbContextOptions, IConfiguration configuration) : base(dbContextOptions)
@@ -17,5 +17,10 @@ namespace AppointmentMicroservice
             options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=AppointmentDB;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
         public DbSet<Shared.AppointmentModel> Appointment { get; set; }
+
+        void IAppointmentDbContext.SaveChanges()
+        {
+            base.SaveChanges();
+        }        
     }
 }

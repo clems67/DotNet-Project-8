@@ -39,7 +39,8 @@ namespace CalifornianHealthMonolithic.Controllers
         [System.Web.Mvc.HttpGet]
         public string GetConsultants()
         {
-            return JsonConvert.SerializeObject(GetConsultantsList());
+            var communicationModel = GetConsultantsList();
+            return JsonConvert.SerializeObject(communicationModel.Consultants);
         }
 
         public ActionResult Index()

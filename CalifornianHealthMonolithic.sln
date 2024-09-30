@@ -7,9 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalifornianHealthMonolithic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsultantMicroservice", "ConsultantMicroservice\ConsultantMicroservice.csproj", "{40F83CE1-8AB2-4A94-A37F-E12EE5F798A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{F5CC6D46-237E-4DDF-BC4C-8745CFAE9B3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{F5CC6D46-237E-4DDF-BC4C-8745CFAE9B3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentMicroservice", "AppointmentMicroservice\AppointmentMicroservice.csproj", "{C7B23B72-BED1-4FB6-8698-1F2BF321DADF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppointmentMicroservice", "AppointmentMicroservice\AppointmentMicroservice.csproj", "{C7B23B72-BED1-4FB6-8698-1F2BF321DADF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{B0B50004-634C-4F57-B7B7-39B06737FED4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C7B23B72-BED1-4FB6-8698-1F2BF321DADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7B23B72-BED1-4FB6-8698-1F2BF321DADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7B23B72-BED1-4FB6-8698-1F2BF321DADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0B50004-634C-4F57-B7B7-39B06737FED4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0B50004-634C-4F57-B7B7-39B06737FED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0B50004-634C-4F57-B7B7-39B06737FED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0B50004-634C-4F57-B7B7-39B06737FED4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

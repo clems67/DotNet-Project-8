@@ -14,6 +14,7 @@ namespace AppointmentMicroservice
                 .Build();
 
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+            builder.Services.AddScoped<IAppointmentDbContext, AppointmentDbContext>();
 
             builder.Services.AddDbContext<AppointmentDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("WebApiDatabase")));

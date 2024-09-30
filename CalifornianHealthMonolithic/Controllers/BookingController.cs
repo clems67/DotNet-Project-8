@@ -46,10 +46,10 @@ namespace CalifornianHealthMonolithic.Controllers
             HttpClient httpClient = new HttpClient();
             var responseContent = await (await httpClient.GetAsync("http://localhost:55258/Home/GetConsultants")).Content.ReadAsStringAsync();
             var fagr = "";
-            var communicationModel = JsonConvert.DeserializeObject<CommunicationModel>(responseContent);
+            var communicationModel = JsonConvert.DeserializeObject<List<Shared.ConsultantModel>>(responseContent);
 
             var consultants = new List<Models.ConsultantModel>();
-            foreach (var consultant in communicationModel.Consultants)
+            foreach (var consultant in communicationModel)
             {
                 consultants.Add(new Models.ConsultantModel
                 {
@@ -87,23 +87,12 @@ namespace CalifornianHealthMonolithic.Controllers
                     return "503"; //Service Unavailable error
                 }
             }
-            return JsonConvert.SerializeObject(rpcClient.communicationModel);
+            return JsonConvert.SerializeObject(rpcClient.communicationModel.Appointments);
         }
 
         [System.Web.Mvc.HttpPost]
         public string BookAppointment([FromBody] AppointmentModel appointmentModel)
         {
-            //CommunicationModel communicationModel = new CommunicationModel
-            //{
-            //    AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,
-            //    AppointmentToCreate = new AppointmentModel
-            //    {
-            //        PatientName = PatientName,
-            //        ConsultantId = ConsultantId,
-            //        startDate = startDate
-            //        //endDate = dateTime + TimeSpan.FromMinutes(30)
-            //    }
-            //};
             var communicationModel = new CommunicationModel
             {
                 AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,

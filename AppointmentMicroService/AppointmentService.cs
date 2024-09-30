@@ -5,14 +5,23 @@ namespace AppointmentMicroservice
 {
     public class AppointmentService : IAppointmentService
     {
-        private readonly AppointmentDbContext _dbContext;
-        public AppointmentService(AppointmentDbContext dbContext)
+        private readonly IAppointmentDbContext _dbContext;
+        public AppointmentService(IAppointmentDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         public bool CreateAppointment(AppointmentModel appointment)
         {
+            DateTime hoursDateTime = appointment.startDate.Date.AddHours(appointment.startDate.Hour);
+            if(appointment.startDate.Minute >= 30)
+            {
+                appointment.startDate = hoursDateTime.AddMinutes(30);
+            }
+            else
+            {
+                appointment.startDate = hoursDateTime;
+            }
             bool alreadyBooked = _dbContext.Appointment
                 .Where(a => a.ConsultantId == appointment.ConsultantId)
                 .Where(a => a.startDate == appointment.startDate)

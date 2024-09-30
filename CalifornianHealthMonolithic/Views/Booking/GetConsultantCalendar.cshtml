@@ -80,10 +80,10 @@
                 return response.json()
             })
             .then(data => {
-                for (let i = 0; i < data.Appointments.length; i++) {
+                for (let i = 0; i < data.length; i++) {
                     calendar.addEventSource({
                         events: [
-                            { title: 'Appointment', start: data.Appointments[i].startDate, end: data.Appointments[i].endDate }
+                            { title: 'Appointment', start: data[i].startDate, end: data[i].endDate }
                         ]
                     });
                 }
