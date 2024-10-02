@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -14,11 +15,11 @@ namespace CalifornianHealthMonolithic.Controllers
 
     public class HomeController : Controller
     {
-        private RpcClient rpcClient = new RpcClient("Consultant_queue");
+        public RpcClient rpcClient;
 
-        private CommunicationModel GetConsultantsList()
+        private async Task<CommunicationModel> GetConsultantsList()
         {
-            var response = rpcClient.CallAsync(
+            var response = await rpcClient.CallAsync(
                 new CommunicationModel
                 {
                     AccessTypeSelected = CommunicationModel.AccessType.getConsultants
@@ -37,15 +38,15 @@ namespace CalifornianHealthMonolithic.Controllers
         }
 
         [System.Web.Mvc.HttpGet]
-        public string GetConsultants()
+        public async Task<string> GetConsultants()
         {
-            var communicationModel = GetConsultantsList();
+            var communicationModel = await GetConsultantsList();
             return JsonConvert.SerializeObject(communicationModel.Consultants);
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var value = GetConsultantsList();
+            var value = await GetConsultantsList();
             if (value.AccessTypeSelected == CommunicationModel.AccessType.getConsultants)
             {
                 var response = new List<Models.ConsultantModel>();

@@ -26,7 +26,7 @@ namespace CalifornianHealthMonolithic.Controllers
     }
     public class BookingController : Controller
     {
-        private RpcClient rpcClient = new RpcClient("Appointment_queue");
+        public RpcClient rpcClient;
         [System.Web.Mvc.HttpPost]
         public string TestPostMethod(CreateAppointmentDto createAppointmentDto)
         {
@@ -67,9 +67,10 @@ namespace CalifornianHealthMonolithic.Controllers
             return View(consultantModelList);
         }
         [System.Web.Mvc.HttpGet]
-        public string GetConsultantCalendarRequest(int id)
+        public async Task<string> GetConsultantCalendarRequest(int id)
         {
-            var response = rpcClient.CallAsync(
+            rpcClient.communicationModel = null;
+            var response = await rpcClient.CallAsync(
                 new CommunicationModel
                 {
                     AccessTypeSelected = CommunicationModel.AccessType.getAppointments,
@@ -91,14 +92,14 @@ namespace CalifornianHealthMonolithic.Controllers
         }
 
         [System.Web.Mvc.HttpPost]
-        public string BookAppointment([FromBody] AppointmentModel appointmentModel)
+        public async Task<string> BookAppointment([FromBody] AppointmentModel appointmentModel)
         {
             var communicationModel = new CommunicationModel
             {
                 AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,
                 AppointmentToCreate = appointmentModel
             };
-            var response = rpcClient.CallAsync(communicationModel);
+            var response = await rpcClient.CallAsync(communicationModel);
 
             var timeoutCounter = 0;
             while (rpcClient.communicationModel == null)

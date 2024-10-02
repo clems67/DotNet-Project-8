@@ -63,23 +63,23 @@
     }
 
     function getConsultantCalendar(id) {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            firstDay: 1,
-            selectable: true,
-            slotMinTime: '08:00',
-            dateClick: handleDateClick,
-            weekends: false
-        });
-        calendar.render();
-
         var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + id;
         fetch(url, { method: "GET" })
             .then(response => {
                 return response.json()
             })
             .then(data => {
+                console.log("consolutant:" + id + " calendar loaded");
+                console.log(data)
+                var calendarEl = document.getElementById('calendar');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    firstDay: 1,
+                    selectable: true,
+                    slotMinTime: '08:00',
+                    dateClick: handleDateClick,
+                    weekends: false
+                });
                 for (let i = 0; i < data.length; i++) {
                     calendar.addEventSource({
                         events: [
@@ -87,6 +87,7 @@
                         ]
                     });
                 }
+                calendar.render();
                 var snackbar = document.getElementById('snackbar')
                 snackbar.classList.remove('loading_calendar')
                 snackbar.classList.add('calendar_loaded')
