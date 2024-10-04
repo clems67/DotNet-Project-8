@@ -9,7 +9,8 @@
     <div id="snackbar" style="display:flex; position:absolute; justify-content:flex-end; z-index:999; visibility:hidden; left:75%; padding: 20px; border-radius:5px;"></div>
 </div>
 
-<div style="display:flex; margin:20px auto; justify-content:center">
+<div style="display:flex; margin:20px auto; justify-content:center; align-items:center;">
+    <button style="height:50px; align-content:center; margin-right:100px" onclick="getConsultantCalendar()">Reload calendar</button>
     <section>
         <label for="consultant">Select Consultant you wish to make an appointment for</label>
         <div class="form-group" style="width:240px">
@@ -28,12 +29,12 @@
 </section>
 
 <style>
-    #snackbar.loading_consultant {
+    #snackbar.loading {
         background: orange;
         visibility: visible !important;
     }
 
-    #snackbar.loading_calendar {
+    #snackbar.loading {
         background: orange;
         visibility: visible !important;
     }
@@ -62,46 +63,67 @@
         while ((new Date().getTime()) < new Date().getTime() + milliseconds) { }
     }
 
-    function getConsultantCalendar(id) {
-        var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + id;
-        fetch(url, { method: "GET" })
-            .then(response => {
-                return response.json()
-            })
-            .then(data => {
-                console.log("consolutant:" + id + " calendar loaded");
-                console.log(data)
-                var calendarEl = document.getElementById('calendar');
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'timeGridWeek',
-                    firstDay: 1,
-                    selectable: true,
-                    slotMinTime: '08:00',
-                    dateClick: handleDateClick,
-                    weekends: false
+    function getConsultantCalendar() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            firstDay: 1,
+            selectable: true,
+            slotMinTime: '08:00',
+            dateClick: handleDateClick,
+            weekends: false
+        });
+        if (consultantIdSelected == 0) {
+            snackbarStyle('error', "Please select a consultant")
+        } else {
+            var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + consultantIdSelected;
+            fetch(url, { method: "GET" })
+                .then(response => {
+                    return response.json()
+                })
+                .then(data => {
+                    for (let i = 0; i < data.length; i++) {
+                        calendar.addEventSource({
+                            events: [
+                                { title: 'Appointment', start: data[i].startDate, end: data[i].endDate }
+                            ]
+                        });
+                    }
+                    calendar.render();
+
+                    snackbarStyle('calendar_loaded', "Calendar loaded !")
                 });
-                for (let i = 0; i < data.length; i++) {
-                    calendar.addEventSource({
-                        events: [
-                            { title: 'Appointment', start: data[i].startDate, end: data[i].endDate }
-                        ]
-                    });
-                }
-                calendar.render();
-                var snackbar = document.getElementById('snackbar')
-                snackbar.classList.remove('loading_calendar')
+        }
+    }
+
+    function snackbarStyle(type, content) {
+        var snackbar = document.getElementById('snackbar')
+        snackbar.classList.remove('loading')
+        snackbar.classList.remove('error')
+        switch (type) {
+            case 'loading':
+                snackbar.classList.add('loading')
+                break;
+            case 'calendar_loaded':
                 snackbar.classList.add('calendar_loaded')
-                snackbar.textContent = "Calendar loaded !"
-                setTimeout(() => {
-                    snackbar.classList.remove('calendar_loaded')
-                }, 3000)
-            });
+                break;
+            case 'appointment_booked':
+                snackbar.classList.add('appointment_booked')
+                break;
+            case 'error':
+                snackbar.classList.add('error')
+                break;
+        }
+        if (type != 'loading') {
+            setTimeout(() => {
+                snackbar.classList.remove(type)
+            }, 3000)
+        }
+        snackbar.textContent = content
     }
 
     function onChangeDropdown(element) {
-        var snackbar = document.getElementById('snackbar')
-        snackbar.classList.add('loading_calendar')
-        snackbar.textContent = "Loading calendar..."
+        snackbarStyle('loading', "Loading calendar...")
 
         console.log("onchange triggered: " + element.options[element.value].innerHTML);
         console.log("onchange triggered: " + element.value);
@@ -120,6 +142,8 @@
             //alert('time selected: ' + info.dateStr);
             console.log(new Date(info.dateStr))
             name = prompt("enter your name");
+            console.log(name)
+            if (name != 'null') {
             fetch("http://localhost:55258/Booking/BookAppointment", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
@@ -129,29 +153,20 @@
                     startDate: new Date(info.dateStr),
                 })
             })
-                .then(data => data.json())
                 .then(data => {
-                    var snackbar = document.getElementById('snackbar')
-                    if (data == "200") {
-                        snackbar.classList.add('appointment_booked')
-                        snackbar.textContent = "Appointment successfully booked !"
-                    } else if (date = "409") {
-                        snackbar.classList.add('error')
-                        snackbar.textContent = "ERROR: appontment already booked !"
+                    if (data.status == "200") {
+                        snackbarStyle('appointment_booked', "Appointment successfully booked !")
+                    } else if (data.status = "409") {
+                        snackbarStyle('error', "ERROR: appontment already booked !")
                     } else {
-                        snackbar.classList.add('error')
-                        snackbar.textContent = "ERROR"
+                        snackbarStyle('error', "ERROR")
                     }
-                    setTimeout(() => {
-                        snackbar.classList.remove('appointment_booked')
-                        snackbar.classList.remove('error')
-                    }, 3000)
-                    getConsultantCalendar(consultantIdSelected)
                 })
+            }
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        //getConsultantCalendar(1)
+        //getConsultantCalendar()
     });
 </script>
