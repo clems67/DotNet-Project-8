@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppointmentMicroservice\AppointmentMicroservice.csproj" />
+    <ProjectReference Include="..\ConsultantMicroservice\ConsultantMicroservice.csproj" />
   </ItemGroup>
 
   <ItemGroup>

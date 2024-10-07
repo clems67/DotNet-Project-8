@@ -4,8 +4,8 @@ namespace ConsultantMicroservice
 {
     public class ConsultantService : IConsultantService
     {
-        private readonly ConsultantDBContext _dbContext;
-        public ConsultantService(ConsultantDBContext dbContext)
+        private readonly IConsultantDBContext _dbContext;
+        public ConsultantService(IConsultantDBContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -13,6 +13,5 @@ namespace ConsultantMicroservice
         {
             return _dbContext.Consultant.ToList();
         }
-
     }
 }

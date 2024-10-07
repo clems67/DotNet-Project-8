@@ -2,21 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TestProject
 {
-    public class AppointmentServiceTests
+    public class AppointmentCreateTests
     {
         private readonly Mock<IAppointmentDbContext> _mockContext;
         private readonly AppointmentService _appointmentService;
 
-        public AppointmentServiceTests()
+        public AppointmentCreateTests()
         {
             _mockContext = new Mock<IAppointmentDbContext>();
 
