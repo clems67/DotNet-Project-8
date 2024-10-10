@@ -14,6 +14,7 @@ namespace ConsultantMicroservice
                 .Build();
 
             builder.Services.AddScoped<IConsultantService, ConsultantService>();
+            builder.Services.AddScoped<IConsultantDBContext, ConsultantDBContext>();
 
             builder.Services.AddDbContext<ConsultantDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("WebApiDatabase")));

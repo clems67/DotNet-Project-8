@@ -2,7 +2,7 @@
 
 namespace ConsultantMicroservice
 {
-    public class ConsultantDBContext : DbContext
+    public class ConsultantDBContext : DbContext, IConsultantDBContext
     {
         private readonly IConfiguration _configuration;
         public ConsultantDBContext(DbContextOptions<ConsultantDBContext> dbContextOptions, IConfiguration configuration) : base(dbContextOptions)
@@ -17,5 +17,9 @@ namespace ConsultantMicroservice
         }
         public DbSet<Shared.ConsultantModel> Consultant { get; set; }
 
+        void IConsultantDBContext.SaveChanges()
+        {
+            base.SaveChanges();
+        }
     }
 }
