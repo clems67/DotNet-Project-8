@@ -34,38 +34,5 @@ namespace CalifornianHealthMonolithic.Controllers
             };
             return View(consultantModelList);
         }
-
-    //    [System.Web.Mvc.HttpGet]
-    //    public async Task<string> GetConsultantCalendarRequest(int id)
-    //    {
-    //        rpcClient.communicationModel = null;
-    //        var response = await rpcClient.CallAsync(
-    //            new CommunicationModel
-    //            {
-    //                AccessTypeSelected = CommunicationModel.AccessType.getAppointments,
-    //                ConsultantIdSelected = id
-    //            }
-    //        );
-
-    //        return JsonConvert.SerializeObject(rpcClient.communicationModel.Appointments);
-    //    }
-
-    //    [System.Web.Mvc.HttpPost]
-    //    public async Task<ActionResult> BookAppointment([FromBody] AppointmentModel appointmentModel)
-    //    {
-    //        var communicationModel = new CommunicationModel
-    //        {
-    //            AccessTypeSelected = CommunicationModel.AccessType.createNewAppointment,
-    //            AppointmentToCreate = appointmentModel
-    //        };
-    //        var response = await rpcClient.CallAsync(communicationModel);
-
-    //        if (rpcClient != null && rpcClient.communicationModel != null)
-    //        {
-    //            int statusCode = rpcClient.communicationModel.IsAppointmentsCreated ? 200 : 409;
-    //            return new HttpStatusCodeResult(statusCode);
-    //        }
-    //        return new HttpStatusCodeResult(500);
-    //    }
     }
 }

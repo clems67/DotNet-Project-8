@@ -32,6 +32,10 @@ namespace Gateway.Controllers
         [HttpPost]
         public async Task<ActionResult> BookAppointment([FromBody] AppointmentModel appointmentModel)
         {
+            if (appointmentModel.startDate < DateTime.Now)
+            {
+                return BadRequest();
+            }
             var communicationModel = new AppointmentCommunicationModel
             {
                 AccessTypeSelected = AppointmentCommunicationModel.AccessType.createNewAppointment,

@@ -21,7 +21,17 @@ namespace Gateway
             builder.Services.AddSingleton<IAppointmentRpcClient>(appointmentRpcClient);
             builder.Services.AddSingleton<IConsultantRpcClient>(consultantRpcClient);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder => builder.AllowAnyOrigin()
+                                      .AllowAnyMethod()
+                                      .AllowAnyHeader());
+            });
+
             var app = builder.Build();
+
+            app.UseCors("AllowAll");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

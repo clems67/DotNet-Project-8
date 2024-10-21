@@ -15,35 +15,6 @@ namespace CalifornianHealthMonolithic.Controllers
 
     public class HomeController : Controller
     {
-        //public RpcClient rpcClient;
-
-        //private async Task<CommunicationModel> GetConsultantsList()
-        //{
-        //    var response = await rpcClient.CallAsync(
-        //        new CommunicationModel
-        //        {
-        //            AccessTypeSelected = CommunicationModel.AccessType.getConsultants
-        //        });
-        //    var timeoutCounter = 0;
-        //    while (rpcClient.communicationModel == null)
-        //    {
-        //        timeoutCounter += 1;
-        //        Thread.Sleep(100);
-        //        if (timeoutCounter == 150)
-        //        {
-        //            return new CommunicationModel { AccessTypeSelected = CommunicationModel.AccessType.overtime };
-        //        }
-        //    }
-        //    return rpcClient.communicationModel;
-        //}
-
-        //[System.Web.Mvc.HttpGet]
-        //public async Task<string> GetConsultants()
-        //{
-        //    var communicationModel = await GetConsultantsList();
-        //    return JsonConvert.SerializeObject(communicationModel.Consultants);
-        //}
-
         public async Task<ActionResult> Index()
         {
             HttpClient httpClient = new HttpClient();

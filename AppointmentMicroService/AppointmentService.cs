@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace AppointmentMicroservice
 {
@@ -13,7 +15,7 @@ namespace AppointmentMicroservice
         public bool CreateAppointment(AppointmentModel appointment)
         {
             DateTime hoursDateTime = appointment.startDate.Date.AddHours(appointment.startDate.Hour);
-            if(appointment.startDate.Minute >= 30)
+            if (appointment.startDate.Minute >= 30)
             {
                 appointment.startDate = hoursDateTime.AddMinutes(30);
             }
@@ -25,7 +27,8 @@ namespace AppointmentMicroservice
                 .Where(a => a.ConsultantId == appointment.ConsultantId)
                 .Where(a => a.startDate == appointment.startDate)
                 .Any();
-            if (alreadyBooked) {
+            if (alreadyBooked)
+            {
                 return false;
             };
             appointment.endDate = appointment.startDate.AddMinutes(30);
