@@ -1,8 +1,6 @@
 ﻿using AppointmentMicroservice;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Shared;
-using System.Net.Sockets;
 
 namespace TestProject
 {

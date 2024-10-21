@@ -1,5 +1,4 @@
-﻿using Shared;
-using System.Linq;
+﻿using System.Linq;
 
 namespace AppointmentMicroservice
 {

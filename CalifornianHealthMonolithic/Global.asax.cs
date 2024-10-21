@@ -27,7 +27,7 @@ namespace CalifornianHealthMonolithic
             //builder.RegisterType<RpcClientAppointmentQueue>().As<IRpcClientAppointmentQueue>().SingleInstance();
             //builder.RegisterType<RpcClientConsultantQueue>().As<IRpcClientConsultantQueue>().SingleInstance();
 
-            DependencyResolver.SetResolver(new CustomDependencyResolver());
+            //DependencyResolver.SetResolver(new CustomDependencyResolver());
 
             //var hospitalContext = new CHEntities();
             //Database.SetInitializer(new ConsultantsInitializer());
@@ -39,30 +39,30 @@ namespace CalifornianHealthMonolithic
     }
 
     // Define your custom resolver
-    public class CustomDependencyResolver : IDependencyResolver
-    {
-        private RpcClient rpcClientConsultant = new RpcClient("Consultant_queue");
-        private RpcClient rpcClientAppointment = new RpcClient("Appointment_queue");
-        public object GetService(Type serviceType)
-        {
-            if (serviceType == typeof(HomeController))
-            {
-                var controller = new HomeController();
-                controller.rpcClient = rpcClientConsultant;
-                return controller;
-            }
-            else if (serviceType == typeof(BookingController))
-            {
-                var controller = new BookingController();
-                controller.rpcClient = rpcClientAppointment;
-                return controller;
-            }
-            return null;
-        }
+    //public class CustomDependencyResolver : IDependencyResolver
+    //{
+    //    private RpcClient rpcClientConsultant = new RpcClient("Consultant_queue");
+    //    private RpcClient rpcClientAppointment = new RpcClient("Appointment_queue");
+    //    public object GetService(Type serviceType)
+    //    {
+    //        if (serviceType == typeof(HomeController))
+    //        {
+    //            var controller = new HomeController();
+    //            controller.rpcClient = rpcClientConsultant;
+    //            return controller;
+    //        }
+    //        else if (serviceType == typeof(BookingController))
+    //        {
+    //            var controller = new BookingController();
+    //            controller.rpcClient = rpcClientAppointment;
+    //            return controller;
+    //        }
+    //        return null;
+    //    }
 
-        public IEnumerable<object> GetServices(Type serviceType)
-        {
-            return Enumerable.Empty<object>();
-        }
-    }
+    //    public IEnumerable<object> GetServices(Type serviceType)
+    //    {
+    //        return Enumerable.Empty<object>();
+    //    }
+    //}
 }

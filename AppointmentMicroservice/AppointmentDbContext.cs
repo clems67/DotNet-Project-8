@@ -16,7 +16,7 @@ namespace AppointmentMicroservice
             //options.UseSqlServer("Server=localhost\\MSSQLLocalDB;Database=AppointmentDB;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true");
             options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=AppointmentDB;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
-        public DbSet<Shared.AppointmentModel> Appointment { get; set; }
+        public DbSet<AppointmentModel> Appointment { get; set; }
 
         void IAppointmentDbContext.SaveChanges()
         {

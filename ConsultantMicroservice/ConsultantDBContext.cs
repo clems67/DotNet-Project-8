@@ -15,7 +15,7 @@ namespace ConsultantMicroservice
             //options.UseSqlServer("Server=localhost\\MSSQLLocalDB;Database=ConsultantDB;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true");
             options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ConsultantDB;Trusted_Connection=True;MultipleActiveResultSets=true");
         }
-        public DbSet<Shared.ConsultantModel> Consultant { get; set; }
+        public DbSet<ConsultantModel> Consultant { get; set; }
 
         void IConsultantDBContext.SaveChanges()
         {

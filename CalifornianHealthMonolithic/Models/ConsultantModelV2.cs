@@ -1,11 +1,14 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
 
-namespace Shared
+namespace CalifornianHealthMonolithic.Models
 {
     [Table("Consultant")]
-    public partial class ConsultantModel
+    public class ConsultantModelV2
     {
         public int Id { get; set; }
 

@@ -1,10 +1,8 @@
-﻿using Shared;
-
-namespace AppointmentMicroservice
+﻿namespace AppointmentMicroservice
 {
     public interface IAppointmentService
     {
-        List<Shared.AppointmentModel> GetRecentAppointments(int id);
+        List<AppointmentModel> GetRecentAppointments(int id);
         bool CreateAppointment(AppointmentModel appointment);
     }
 }

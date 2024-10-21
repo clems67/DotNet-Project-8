@@ -195,18 +195,21 @@
     <Compile Include="Consultant.cs" />
     <Compile Include="ConsultantCalendar.cs" />
     <Compile Include="Controllers\BookingController.cs" />
+    <Compile Include="Models\AppointmentCommunicationModel.cs" />
+    <Compile Include="Models\AppointmentModel.cs" />
     <Compile Include="Models\BookingModel.cs" />
     <Compile Include="Models\AvailableCalendarDates.cs" />
     <Compile Include="Models\CHDBContext.cs" />
     <Compile Include="Models\ConsultantCalendarModel.cs" />
+    <Compile Include="Models\ConsultantCommunicationModel.cs" />
     <Compile Include="Models\ConsultantModel.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ConsultantModelV2.cs" />
     <Compile Include="Patient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RpcClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\CH.mdf" />
@@ -270,12 +273,6 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Booking\GetConsultantCalendar.cshtml" />
     <Content Include="Views\Booking\ConfirmAppointment.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.csproj">
-      <Project>{f5cc6d46-237e-4ddf-bc4c-8745cfae9b3a}</Project>
-      <Name>Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />

@@ -9,7 +9,7 @@ namespace ConsultantMicroservice
         {
             _dbContext = dbContext;
         }
-        public List<Shared.ConsultantModel> GetConsultants()
+        public List<ConsultantModel> GetConsultants()
         {
             return _dbContext.Consultant.ToList();
         }

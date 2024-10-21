@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Web;
 
-namespace Shared
+namespace Gateway.Models
 {
     public class AppointmentModel
     {

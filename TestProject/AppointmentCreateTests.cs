@@ -1,7 +1,6 @@
 ﻿using AppointmentMicroservice;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Shared;
 
 namespace TestProject
 {
@@ -15,7 +14,7 @@ namespace TestProject
             _mockContext = new Mock<IAppointmentDbContext>();
 
             var appointments = new List<AppointmentModel>().AsQueryable();
-            var mockSet = new Mock<DbSet<Shared.AppointmentModel>>();
+            var mockSet = new Mock<DbSet<AppointmentMicroservice.AppointmentModel>>();
             mockSet.As<IQueryable<AppointmentModel>>().Setup(m => m.Provider).Returns(appointments.Provider);
             mockSet.As<IQueryable<AppointmentModel>>().Setup(m => m.Expression).Returns(appointments.Expression);
             mockSet.As<IQueryable<AppointmentModel>>().Setup(m => m.ElementType).Returns(appointments.ElementType);

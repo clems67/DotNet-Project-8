@@ -76,9 +76,12 @@
         if (consultantIdSelected == 0) {
             snackbarStyle('error', "Please select a consultant")
         } else {
-            var url = "http://localhost:55258/Booking/GetConsultantCalendarRequest/" + consultantIdSelected;
+            //var url = "https://localhost:7092/Appointment?consultantId=" + consultantIdSelected;
+            //var url = "https://localhost:7092/Appointment?consultantId=" + new URLSearchParams({ consultantId: consultantIdSelected })
+            var url = "https://localhost:7092/Appointment/" + consultantIdSelected;
             fetch(url, { method: "GET" })
                 .then(response => {
+                    console.log(response)
                     return response.json()
                 })
                 .then(data => {
@@ -144,7 +147,7 @@
             name = prompt("enter your name");
             console.log(name)
             if (name != 'null') {
-            fetch("http://localhost:55258/Booking/BookAppointment", {
+            fetch("https://localhost:7092/Appointment", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

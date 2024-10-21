@@ -2,6 +2,6 @@
 {
     public interface IConsultantService
     {
-        List<Shared.ConsultantModel> GetConsultants();
+        List<ConsultantModel> GetConsultants();
     }
 }

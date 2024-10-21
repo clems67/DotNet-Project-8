@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moq;
-using Shared;
 using ConsultantMicroservice;
-using AppointmentMicroservice;
 
 namespace TestProject
 {
